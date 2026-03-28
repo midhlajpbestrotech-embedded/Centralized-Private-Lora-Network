@@ -1,0 +1,9 @@
+Command: C:\EspressifTools\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/EspressifTools/frameworks/esp-idf-v5.5.2/tools/idf_monitor.py -p COM7 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace C:\Users\in001\Desktop\LoRa Project\Code part\Local_Gateway\build\local_gateway_gw1.elf C:\Users\in001\Desktop\LoRa Project\Code part\Local_Gateway\build\bootloader\bootloader.elf --force-color -m 'C:\EspressifTools\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:/EspressifTools/frameworks/esp-idf-v5.5.2/\tools\idf.py' '-p' 'COM7'
+[0;33m--- Warning: GDB cannot open serial ports accessed as COMx[0m
+[0;33m--- Using \\.\COM7 instead...[0m
+[0;33m--- esp-idf-monitor 1.9.0 on \\.\COM7 115200[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
+[0m--- 0x4200f880: [0;33mspi_device_queue_trans[0m[0m at [0;32mC:/EspressifTools/frameworks/esp-idf-v5.5.2/components/esp_driver_spi/src/gpspi/spi_master.c[0m[0m:[1;31m1253[0m
+[0m--- 0x403cbf10: [0;33mesp_bootloader_get_description[0m[0m at [0;32mC:/EspressifTools/frameworks/esp-idf-v5.5.2/components/esp_bootloader_format/esp_bootloader_desc.c[0m[0m:[1;31m39[0m
+[0m--- 0x403ce710: [0;33mesp_flash_encryption_enabled[0m[0m at [0;32mC:/EspressifTools/frameworks/esp-idf-v5.5.2/components/bootloader_support/src/flash_encrypt.c[0m[0m:[1;31m89[0m
+[0m--- 0x403cbf1a: [0;33mcall_start_cpu0[0m[0m at [0;32mC:/EspressifTools/frameworks/esp-idf-v5.5.2/components/bootloader/subproject/main/bootloader_start.c[0m[0m:[1;31m25[0m

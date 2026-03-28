@@ -1,0 +1,554 @@
+Command: C:\EspressifTools\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/EspressifTools/frameworks/esp-idf-v5.5.2/tools/idf_monitor.py -p COM7 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace C:\Users\in001\Desktop\LoRa Project\Code part\Local_Gateway\build\local_gateway_gw1.elf C:\Users\in001\Desktop\LoRa Project\Code part\Local_Gateway\build\bootloader\bootloader.elf --force-color -m 'C:\EspressifTools\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:/EspressifTools/frameworks/esp-idf-v5.5.2/\tools\idf.py' '-p' 'COM7'
+[0;32mI (100) esp_image: segment 3: paddr=00020020 vaddr=42000020 sizeESP-ROM:esp32c3-api1-20210207[0m
+Build:Feb  7 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0xf (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40387f1a
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x15c4
+load:0x403cbf10,len:0xc84
+load:0x403ce710,len:0x2fd0
+entry 0x403cbf1a
+[0;32mI (24) boot: ESP-IDF v5.5.2 2nd stage bootloader[0m
+[0;32mI (24) boot: compile time Mar 28 2026 13:08:23[0m
+[0;32mI (25) boot: chip revision: v0.4[0m
+[0;32mI (25) boot: efuse block revision: v1.3[0m
+[0;32mI (28) boot.esp32c3: SPI Speed      : 80MHz[0m
+[0;32mI (32) boot.esp32c3: SPI Mode       : DIO[0m
+[0;32mI (36) boot.esp32c3: SPI Flash Size : 2MB[0m
+[0;32mI (39) boot: Enabling RNG early entropy source...[0m
+[0;32mI (44) boot: Partition Table:[0m
+[0;32mI (46) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (66) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (72) boot: End of partition table[0m
+[0;32mI (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=0b440h ( 46144) map[0m
+[0;32mI (90) esp_image: segment 1: paddr=0001b468 vaddr=3fc8e600 size=01490h (  5264) load[0m
+[0;32mI (92) esp_image: segment 2: paddr=0001c900 vaddr=40380000 size=03718h ( 14104) load[0m
+[0;32mI (100) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=18830h (100400) map[0m
+[0;32mI (121) esp_image: segment 4: paddr=00038858 vaddr=40383718 size=0ade4h ( 44516) load[0m
+[0;32mI (130) esp_image: segment 5: paddr=00043644 vaddr=50000000 size=00020h (    32) load[0m
+[0;32mI (135) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (135) boot: Disabling RNG early entropy source...[0m
+[0;32mI (147) cpu_start: Unicore app[0m
+[0;32mI (155) cpu_start: GPIO 20 and 21 are used as console UART I/O pins[0m
+[0;32mI (156) cpu_start: Pro cpu start user code[0m
+[0;32mI (156) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (158) app_init: Application information:[0m
+[0;32mI (162) app_init: Project name:     local_gateway_gw1[0m
+[0;32mI (166) app_init: App version:      1[0m
+[0;32mI (170) app_init: Compile time:     Mar 28 2026 13:07:46[0m
+[0;32mI (175) app_init: ELF file SHA256:  f800d16c9...[0m
+[0;32mI (179) app_init: ESP-IDF:          v5.5.2[0m
+[0;32mI (183) efuse_init: Min chip rev:     v0.3[0m
+[0;32mI (187) efuse_init: Max chip rev:     v1.99 [0m
+[0;32mI (191) efuse_init: Chip rev:         v0.4[0m
+[0;32mI (195) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (201) heap_init: At 3FC909F0 len 0002F610 (189 KiB): RAM[0m
+[0;32mI (206) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM[0m
+[0;32mI (212) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM[0m
+[0;32mI (218) heap_init: At 50000020 len 00001FC8 (7 KiB): RTCRAM[0m
+[0;32mI (224) spi_flash: detected chip: generic[0m
+[0;32mI (227) spi_flash: flash io: dio[0m
+[0;33mW (230) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (242) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (249) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (255) main_task: Started on CPU0[0m
+[0;32mI (255) main_task: Calling app_main()[0m
+[0;32mI (255) GW1: ========================================[0m
+[0;32mI (265) GW1:  Estrotech Local Gateway GW1 — R&D Phase[0m
+[0;32mI (265) GW1:  ESP32-C3 Super Mini | ESP-IDF v5.5.2[0m
+[0;32mI (275) GW1:  Active: Node 0x01 (T=0s), Node 0x02 (T=4s)[0m
+[0;32mI (275) GW1:  Offline: Node 0x03 (sentinel always)[0m
+[0;32mI (285) GW1:  L1=433MHz L2=434MHz ACK=0xAA Retry=3[0m
+[0;32mI (285) GW1: ========================================[0m
+[0;32mI (295) GW1: SPI bus initialized on SCK=4 MISO=5 MOSI=6 NSS=7[0m
+[0;32mI (315) GW1: SX1278 hardware reset complete[0m
+[0;32mI (315) GW1: SX1278 sanity check PASSED — reg 0x42 = 0x12[0m
+[0;32mI (325) GW1: SX1278 radio parameters configured[0m
+[0;32mI (325) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (325) GW1: Task A (LoRa RX) started[0m
+[0;32mI (325) GW1: Task B (Validation) started[0m
+[0;32mI (325) GW1: Task C (Aggregation) started[0m
+[0;32mI (335) GW1: Task D (LoRa TX) started[0m
+[0;32mI (335) GW1: Cycle manager task started[0m
+[0;32mI (335) GW1: All tasks created — gateway operational[0m
+[0;32mI (345) GW1: Listening on 433.0 MHz for Node 0x01 and Node 0x02[0m
+[0;32mI (345) main_task: Returned from app_main()[0m
+[0;32mI (25335) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (25335) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (25335) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (25335) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (25335) GW1: L2 packet built — GW_TS=25119 ms[0m
+[0;32mI (25345) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (25345) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (25355) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (25355) GW1:   CRC = 0x22A4[0m
+[0;32mI (25365) GW1: Task D: TX trigger received[0m
+[0;32mI (25375) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (25375) GW1: L2 TX attempt 1/3[0m
+[0;32mI (25455) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (25955) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (25955) GW1: L2 TX attempt 2/3[0m
+[0;32mI (26035) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (26535) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (26535) GW1: L2 TX attempt 3/3[0m
+[0;32mI (26605) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (27115) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (27115) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (27115) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (27115) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (30335) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (30375) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (55385) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (55385) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (55385) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (55385) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (55385) GW1: L2 packet built — GW_TS=55168 ms[0m
+[0;32mI (55395) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (55395) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (55405) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (55405) GW1:   CRC = 0x678A[0m
+[0;32mI (55415) GW1: Task D: TX trigger received[0m
+[0;32mI (55425) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (55425) GW1: L2 TX attempt 1/3[0m
+[0;32mI (55505) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (56005) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (56005) GW1: L2 TX attempt 2/3[0m
+[0;32mI (56075) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (56585) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (56585) GW1: L2 TX attempt 3/3[0m
+[0;32mI (56655) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (57155) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (57155) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (57155) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (57165) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (60385) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (60425) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (85435) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (85435) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (85435) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (85435) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (85435) GW1: L2 packet built — GW_TS=85218 ms[0m
+[0;32mI (85445) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (85445) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (85455) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (85455) GW1:   CRC = 0xC45C[0m
+[0;32mI (85465) GW1: Task D: TX trigger received[0m
+[0;32mI (85475) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (85475) GW1: L2 TX attempt 1/3[0m
+[0;32mI (85555) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (86055) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (86055) GW1: L2 TX attempt 2/3[0m
+[0;32mI (86125) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (86635) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (86635) GW1: L2 TX attempt 3/3[0m
+[0;32mI (86705) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (87205) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (87205) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (87205) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (87215) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (90435) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (90475) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (115485) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (115485) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (115485) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (115485) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (115485) GW1: L2 packet built — GW_TS=115269 ms[0m
+[0;32mI (115495) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (115495) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (115505) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (115505) GW1:   CRC = 0xE899[0m
+[0;32mI (115515) GW1: Task D: TX trigger received[0m
+[0;32mI (115525) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (115525) GW1: L2 TX attempt 1/3[0m
+[0;32mI (115605) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (116105) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (116105) GW1: L2 TX attempt 2/3[0m
+[0;32mI (116185) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (116685) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (116685) GW1: L2 TX attempt 3/3[0m
+[0;32mI (116755) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (117265) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (117265) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (117265) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (117265) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (120485) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (120525) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (145535) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (145535) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (145535) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (145535) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (145535) GW1: L2 packet built — GW_TS=145319 ms[0m
+[0;32mI (145545) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (145545) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (145555) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (145555) GW1:   CRC = 0xF5A3[0m
+[0;32mI (145565) GW1: Task D: TX trigger received[0m
+[0;32mI (145575) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (145575) GW1: L2 TX attempt 1/3[0m
+[0;32mI (145655) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (146155) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (146155) GW1: L2 TX attempt 2/3[0m
+[0;32mI (146235) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (146735) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (146735) GW1: L2 TX attempt 3/3[0m
+[0;32mI (146805) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (147315) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (147315) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (147315) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (147315) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (150535) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (150575) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (175585) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (175585) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (175585) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (175585) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (175585) GW1: L2 packet built — GW_TS=175369 ms[0m
+[0;32mI (175595) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (175595) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (175605) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (175605) GW1:   CRC = 0xC507[0m
+[0;32mI (175615) GW1: Task D: TX trigger received[0m
+[0;32mI (175625) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (175625) GW1: L2 TX attempt 1/3[0m
+[0;32mI (175705) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (176205) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (176205) GW1: L2 TX attempt 2/3[0m
+[0;32mI (176285) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (176785) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (176785) GW1: L2 TX attempt 3/3[0m
+[0;32mI (176855) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (177365) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (177365) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (177365) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (177365) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (180585) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (180625) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (205635) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (205635) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (205635) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (205635) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (205635) GW1: L2 packet built — GW_TS=205419 ms[0m
+[0;32mI (205645) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (205645) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (205655) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (205655) GW1:   CRC = 0x6AA5[0m
+[0;32mI (205665) GW1: Task D: TX trigger received[0m
+[0;32mI (205675) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (205675) GW1: L2 TX attempt 1/3[0m
+[0;32mI (205755) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (206255) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (206255) GW1: L2 TX attempt 2/3[0m
+[0;32mI (206335) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (206835) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (206835) GW1: L2 TX attempt 3/3[0m
+[0;32mI (206905) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (207415) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (207415) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (207415) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (207415) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (210635) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (210675) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (235685) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (235685) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (235685) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (235685) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (235685) GW1: L2 packet built — GW_TS=235469 ms[0m
+[0;32mI (235695) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (235695) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (235705) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (235705) GW1:   CRC = 0x8498[0m
+[0;32mI (235715) GW1: Task D: TX trigger received[0m
+[0;32mI (235725) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (235725) GW1: L2 TX attempt 1/3[0m
+[0;32mI (235805) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (236305) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (236305) GW1: L2 TX attempt 2/3[0m
+[0;32mI (236385) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (236885) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (236885) GW1: L2 TX attempt 3/3[0m
+[0;32mI (236955) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (237465) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (237465) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (237465) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (237465) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (240685) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (240725) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (265735) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (265735) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (265735) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (265735) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (265735) GW1: L2 packet built — GW_TS=265519 ms[0m
+[0;32mI (265745) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (265745) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (265755) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (265755) GW1:   CRC = 0x9999[0m
+[0;32mI (265765) GW1: Task D: TX trigger received[0m
+[0;32mI (265775) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (265775) GW1: L2 TX attempt 1/3[0m
+[0;32mI (265855) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (266355) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (266355) GW1: L2 TX attempt 2/3[0m
+[0;32mI (266435) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (266935) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (266935) GW1: L2 TX attempt 3/3[0m
+[0;32mI (267005) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (267515) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (267515) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (267515) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (267515) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (270735) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (270775) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (295785) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (295785) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (295785) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (295785) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (295785) GW1: L2 packet built — GW_TS=295569 ms[0m
+[0;32mI (295795) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (295795) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (295805) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (295805) GW1:   CRC = 0x3CAD[0m
+[0;32mI (295815) GW1: Task D: TX trigger received[0m
+[0;32mI (295825) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (295825) GW1: L2 TX attempt 1/3[0m
+[0;32mI (295905) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (296405) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (296405) GW1: L2 TX attempt 2/3[0m
+[0;32mI (296485) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (296985) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (296985) GW1: L2 TX attempt 3/3[0m
+[0;32mI (297055) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (297565) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (297565) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (297565) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (297565) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (300785) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (300825) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (325835) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (325835) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (325835) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (325835) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (325835) GW1: L2 packet built — GW_TS=325619 ms[0m
+[0;32mI (325845) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (325845) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (325855) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (325855) GW1:   CRC = 0xCE5A[0m
+[0;32mI (325865) GW1: Task D: TX trigger received[0m
+[0;32mI (325875) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (325875) GW1: L2 TX attempt 1/3[0m
+[0;32mI (325955) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (326455) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (326455) GW1: L2 TX attempt 2/3[0m
+[0;32mI (326535) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (327035) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (327035) GW1: L2 TX attempt 3/3[0m
+[0;32mI (327105) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (327615) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (327615) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (327615) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (327615) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (330835) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (330875) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (355885) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (355885) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (355885) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (355885) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (355885) GW1: L2 packet built — GW_TS=355669 ms[0m
+[0;32mI (355895) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (355895) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (355905) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (355905) GW1:   CRC = 0xC360[0m
+[0;32mI (355915) GW1: Task D: TX trigger received[0m
+[0;32mI (355925) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (355925) GW1: L2 TX attempt 1/3[0m
+[0;32mI (356005) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (356505) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (356505) GW1: L2 TX attempt 2/3[0m
+[0;32mI (356585) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (357085) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (357085) GW1: L2 TX attempt 3/3[0m
+[0;32mI (357155) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (357665) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (357665) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (357665) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (357665) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (360885) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (360925) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (385935) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (385935) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (385935) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (385935) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (385935) GW1: L2 packet built — GW_TS=385719 ms[0m
+[0;32mI (385945) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (385945) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (385955) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (385955) GW1:   CRC = 0x1DAE[0m
+[0;32mI (385965) GW1: Task D: TX trigger received[0m
+[0;32mI (385975) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (385975) GW1: L2 TX attempt 1/3[0m
+[0;32mI (386055) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (386555) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (386555) GW1: L2 TX attempt 2/3[0m
+[0;32mI (386635) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (387135) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (387135) GW1: L2 TX attempt 3/3[0m
+[0;32mI (387205) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (387715) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (387715) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (387715) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (387715) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (390935) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (390975) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (415985) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (415985) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (415985) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (415985) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (415985) GW1: L2 packet built — GW_TS=415769 ms[0m
+[0;32mI (415995) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (415995) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (416005) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (416005) GW1:   CRC = 0xD914[0m
+[0;32mI (416015) GW1: Task D: TX trigger received[0m
+[0;32mI (416025) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (416025) GW1: L2 TX attempt 1/3[0m
+[0;32mI (416105) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (416605) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (416605) GW1: L2 TX attempt 2/3[0m
+[0;32mI (416685) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (417185) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (417185) GW1: L2 TX attempt 3/3[0m
+[0;32mI (417255) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (417765) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (417765) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (417765) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (417765) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (420985) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (421025) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (446035) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (446035) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (446035) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (446035) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (446035) GW1: L2 packet built — GW_TS=445819 ms[0m
+[0;32mI (446045) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (446045) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (446055) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (446055) GW1:   CRC = 0x861C[0m
+[0;32mI (446065) GW1: Task D: TX trigger received[0m
+[0;32mI (446075) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (446075) GW1: L2 TX attempt 1/3[0m
+[0;32mI (446155) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (446655) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (446655) GW1: L2 TX attempt 2/3[0m
+[0;32mI (446735) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (447235) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (447235) GW1: L2 TX attempt 3/3[0m
+[0;32mI (447305) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (447815) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (447815) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (447815) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (447815) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (451035) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (451075) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (476085) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (476085) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (476085) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (476085) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (476085) GW1: L2 packet built — GW_TS=475869 ms[0m
+[0;32mI (476095) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (476095) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (476105) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (476105) GW1:   CRC = 0x77B4[0m
+[0;32mI (476115) GW1: Task D: TX trigger received[0m
+[0;32mI (476125) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (476125) GW1: L2 TX attempt 1/3[0m
+[0;32mI (476205) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (476705) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (476705) GW1: L2 TX attempt 2/3[0m
+[0;32mI (476785) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (477285) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (477285) GW1: L2 TX attempt 3/3[0m
+[0;32mI (477355) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (477865) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (477865) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (477865) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (477865) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (481085) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (481125) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (506135) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (506135) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (506135) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (506135) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (506135) GW1: L2 packet built — GW_TS=505919 ms[0m
+[0;32mI (506145) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (506145) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (506155) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (506155) GW1:   CRC = 0x7488[0m
+[0;32mI (506165) GW1: Task D: TX trigger received[0m
+[0;32mI (506175) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (506175) GW1: L2 TX attempt 1/3[0m
+[0;32mI (506255) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (506755) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (506755) GW1: L2 TX attempt 2/3[0m
+[0;32mI (506835) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (507335) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (507335) GW1: L2 TX attempt 3/3[0m
+[0;32mI (507405) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (507915) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (507915) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (507915) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (507915) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (511135) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (511175) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;32mI (536185) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (536185) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (536185) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (536185) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (536185) GW1: L2 packet built — GW_TS=535969 ms[0m
+[0;32mI (536195) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (536195) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (536205) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (536205) GW1:   CRC = 0x8DA8[0m
+[0;32mI (536215) GW1: Task D: TX trigger received[0m
+[0;32mI (536225) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (536225) GW1: L2 TX attempt 1/3[0m
+[0;32mI (536305) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (536805) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (536805) GW1: L2 TX attempt 2/3[0m
+[0;32mI (536885) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (537385) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (537385) GW1: L2 TX attempt 3/3[0m
+[0;32mI (537455) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (537965) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (537965) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (537965) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (537965) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (541185) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (541225) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
+[0;33mW (553755) GW1: Task A: wrong size 11 (expected 12)[0m
+[0;32mI (566235) GW1: --- T=25s: Aggregating ---[0m
+[0;32mI (566235) GW1:   Node 0x01 (Temp) : ABSENT[0m
+[0;32mI (566235) GW1:   Node 0x02 (Hum)  : ABSENT[0m
+[0;32mI (566235) GW1:   Node 0x03 (Light): OFFLINE (R&D sentinel)[0m
+[0;32mI (566235) GW1: L2 packet built — GW_TS=566019 ms[0m
+[0;32mI (566245) GW1:   NodeBlock 1 (0x01 Temp)  : SENTINEL  raw=0xFFFF[0m
+[0;32mI (566245) GW1:   NodeBlock 2 (0x02 Hum)   : SENTINEL  raw=0xFFFF[0m
+[0;32mI (566255) GW1:   NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)[0m
+[0;32mI (566255) GW1:   CRC = 0x17A9[0m
+[0;32mI (566265) GW1: Task D: TX trigger received[0m
+[0;32mI (566275) GW1: Task D: mutex acquired — L2 TX begin[0m
+[0;32mI (566275) GW1: L2 TX attempt 1/3[0m
+[0;32mI (566355) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (566855) GW1: L2 ACK timeout on attempt 1[0m
+[0;32mI (566855) GW1: L2 TX attempt 2/3[0m
+[0;32mI (566935) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (567435) GW1: L2 ACK timeout on attempt 2[0m
+[0;32mI (567435) GW1: L2 TX attempt 3/3[0m
+[0;32mI (567505) GW1: L2 TX complete — switching to RX 434 MHz for ACK[0m
+[0;33mW (568015) GW1: L2 ACK timeout on attempt 3[0m
+[1;31mE (568015) GW1: L2 TX FAILED — no ACK after 3 attempts[0m
+[0;32mI (568015) GW1: Restored 433 MHz RX mode for next cycle[0m
+[0;32mI (568015) GW1: Task D: mutex released — Task A resumes RX[0m
+[0;32mI (571235) GW1: --- T=30s: Cycle reset — buffers cleared ---[0m
+[0;32mI (571275) GW1: Cycle timers armed — T=25s aggregation, T=30s reset[0m
