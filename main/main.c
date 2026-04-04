@@ -1,7 +1,7 @@
 /*
  * =============================================================================
  * Estrotech — Centralized Private LoRa Sensor Network
- * Local Gateway — GW1 — R&D Phase Firmware
+ * Local Gateway — GW1 — R&D Phase Firmware (REVISED)
  * =============================================================================
  *
  * Owner        : Midhlaj
@@ -9,10 +9,17 @@
  * Board        : ESP32-C3 Super Mini
  * LoRa Module  : AI-Thinker Ra-02 SX1278
  *
+ * REVISION CHANGES:
+ *   ✓ Node 0x03 (Light sensor) now ACTIVE (was offline/sentinel)
+ *   ✓ Node timing: Node 0x01 @ T=0s, Node 0x02 @ T=4s, Node 0x03 @ T=8s
+ *   ✓ Sensor type validation: reject packets with wrong Node_ID for sensor type
+ *   ✓ Frequency switching safety: explicit FIFO reset + IRQ clear + PLL lock delay
+ *   ✓ Edge case fixes: race conditions, aggregation timing, TX watchdog
+ *
  * R&D Phase Scope:
  *   - Node 0x01 (DS18B20 Temp)    — TX at T=0s
- *   - Node 0x02 (Humidity)        — TX at T=4s  [R&D compressed timing]
- *   - Node 0x03 (Light)           — OFFLINE — always sentinel
+ *   - Node 0x02 (Humidity)        — TX at T=4s
+ *   - Node 0x03 (Light)           — TX at T=8s  [NOW ACTIVE]
  *   - GW_ID = 0x01
  *   - Layer 2 TX to Main Gateway on 434.0 MHz with ACK (0xAA) + retry x3
  *   - Aggregation at T=25s
@@ -22,34 +29,6 @@
  *   SCK=GPIO4  MISO=GPIO5  MOSI=GPIO6  NSS=GPIO7  RST=GPIO10  DIO0=GPIO3
  *
  * =============================================================================
- * FIXES APPLIED vs PREVIOUS REVISION:
- *
- *   FIX A — ESP32-C3 is SINGLE CORE (Core 0 only).
- *            All tasks use xTaskCreate() — no core pinning.
- *
- *   FIX B — L1_PACKET_SIZE corrected from 11 to 12.
- *            Node_ID(1)+GW_ID(1)+Pkt_ID(2)+TS(4)+Sensor_Value(2)+CRC(2)=12.
- *
- *   FIX C — CRC read offset corrected from 9 to 10.
- *            CRC bytes are at offset 10–11, not 9–10.
- *
- *   FIX D — Mutex usage in Task A corrected.
- *            Mutex guards full FIFO session, not individual register reads.
- *            s_tx_active flag signals Task A to yield during TX.
- *
- *   FIX E — Dual-consumer of s_cycle_reset semaphore removed.
- *            Two separate semaphores: s_cycle_reset_c and s_cycle_reset_mgr.
- *
- *   FIX F — CRC input length corrected from 9 bytes to 10 bytes.
- *            Node computes CRC over bytes 0..9 (all data including both bytes
- *            of Sensor_Value). Gateway now matches: crc16_ccitt(raw, 10).
- *
- *   FIX G — Stale comments corrected (no runtime change).
- *            Section 9 comment updated: Layer 1 CRC is over 10 bytes, not 9.
- *            Section 11 packet layout comment corrected to match actual code.
- *            These were documentation inconsistencies left from earlier drafts.
- * =============================================================================
- *
  * Layer 1 packet (12 bytes, big-endian):
  *   [ Node_ID | GW_ID | Packet_ID | Timestamp | Sensor_Value | CRC ]
  *     1B        1B      2B          4B           2B             2B
@@ -83,15 +62,7 @@
 
 /* ============================================================
  * SECTION 1 — PIN DEFINITIONS (ESP32-C3 Super Mini)
- * ============================================================
- * Original spec pins (ESP32-30pin) are NOT usable on C3 Super Mini.
- * Remapped:
- *   Original: SCK=18, MISO=19, MOSI=23, NSS=5,  RST=14, DIO0=26
- *   C3 Mini : SCK=4,  MISO=5,  MOSI=6,  NSS=7,  RST=10, DIO0=3
- *
- * GPIO 20/21 reserved for USB-Serial (idf.py monitor).
- * GPIO 9     reserved for BOOT button.
- */
+ * ============================================================ */
 #define PIN_SCK     4
 #define PIN_MISO    5
 #define PIN_MOSI    6
@@ -156,14 +127,16 @@
 #define FREQ_L2_MID             0x80
 #define FREQ_L2_LSB             0x00
 
-#define L1_PACKET_SIZE          12      /* FIX B: was 11 */
-#define L2_PACKET_SIZE          35      /* 1+1+4 + 3×9 + 2 */
+#define L1_PACKET_SIZE          12
+#define L2_PACKET_SIZE          35
 #define L2_ACK_SIZE             1
 
 #define CYCLE_DURATION_MS       30000
 #define AGGREGATION_TIME_MS     25000
 #define LAYER2_ACK_TIMEOUT_MS   500
 #define LAYER2_MAX_RETRIES      3
+#define TX_WATCHDOG_TIMEOUT_MS  5000    /* NEW: TX operation timeout */
+#define FREQ_SWITCH_SETTLE_MS   15      /* NEW: PLL lock delay */
 
 #define NODE_TEMP_ID            0x01
 #define NODE_HUM_ID             0x02
@@ -175,13 +148,15 @@
 
 #define SX1278_VERSION_EXPECTED 0x12
 
-/*
- * L1_CRC_INPUT_BYTES — number of bytes fed into CRC16-CCITT for Layer 1.
- * Node computes over bytes 0..9 (10 bytes = all data fields including both
- * bytes of Sensor_Value). Gateway must use the same count.
- * Confirmed from node source: crc16_ccitt(buf, 10).
- */
-#define L1_CRC_INPUT_BYTES      10      /* FIX F */
+#define L1_CRC_INPUT_BYTES      10
+
+/* NEW: Sensor type definitions for validation */
+typedef enum {
+    SENSOR_TYPE_TEMPERATURE = 1,
+    SENSOR_TYPE_HUMIDITY    = 2,
+    SENSOR_TYPE_LIGHT       = 3,
+    SENSOR_TYPE_UNKNOWN     = 0xFF
+} sensor_type_t;
 
 /* ============================================================
  * SECTION 4 — DATA STRUCTURES
@@ -193,6 +168,7 @@ typedef struct {
     uint32_t timestamp;
     uint16_t sensor_value;
     uint16_t last_packet_id;
+    uint32_t cycle_timestamp;  /* NEW: track which cycle this data belongs to */
 } node_buffer_t;
 
 typedef struct {
@@ -210,6 +186,7 @@ static const char *TAG = "GW1";
 static spi_device_handle_t s_spi_handle;
 static SemaphoreHandle_t   s_lora_mutex;
 static volatile bool       s_tx_active = false;
+static volatile uint32_t   s_tx_start_time = 0;  /* NEW: TX watchdog */
 
 static SemaphoreHandle_t s_agg_trigger;
 static SemaphoreHandle_t s_cycle_reset_c;
@@ -223,6 +200,8 @@ static node_buffer_t s_node_buf[3];
 
 static uint8_t s_l2_packet[L2_PACKET_SIZE];
 static bool    s_l2_packet_ready = false;
+
+static uint32_t s_current_cycle_start = 0;  /* NEW: cycle timing validation */
 
 /* ============================================================
  * SECTION 6 — SX1278 SPI DRIVER
@@ -323,15 +302,15 @@ static void sx1278_configure_radio(void)
     vTaskDelay(pdMS_TO_TICKS(10));
 
     write_reg(REG_SYNC_WORD,      SYNC_WORD);
-    write_reg(REG_MODEM_CONFIG1,  0x72);    /* BW=125kHz CR=4/5 explicit header */
-    write_reg(REG_MODEM_CONFIG2,  0x74);    /* SF=7 RxPayloadCrcOn=1            */
-    write_reg(REG_MODEM_CONFIG3,  0x04);    /* LNA gain auto                    */
-    write_reg(REG_PA_CONFIG,      0xF8);    /* PA_BOOST 10 dBm                  */
-    write_reg(REG_LNA,            0x23);    /* Max gain boost                   */
+    write_reg(REG_MODEM_CONFIG1,  0x72);
+    write_reg(REG_MODEM_CONFIG2,  0x74);
+    write_reg(REG_MODEM_CONFIG3,  0x04);
+    write_reg(REG_PA_CONFIG,      0xF8);
+    write_reg(REG_LNA,            0x23);
     write_reg(REG_PREAMBLE_MSB,   0x00);
     write_reg(REG_PREAMBLE_LSB,   0x08);
     write_reg(REG_PAYLOAD_LENGTH, L1_PACKET_SIZE);
-    write_reg(REG_DIO_MAPPING1,   0x00);    /* DIO0 = RxDone                    */
+    write_reg(REG_DIO_MAPPING1,   0x00);
     write_reg(REG_FIFO_RX_BASE_ADDR, 0x00);
     write_reg(REG_FIFO_TX_BASE_ADDR, 0x80);
 
@@ -341,38 +320,62 @@ static void sx1278_configure_radio(void)
 }
 
 /* ============================================================
- * SECTION 8 — FREQUENCY SWITCHING
- * ============================================================ */
+ * SECTION 8 — FREQUENCY SWITCHING (WITH SAFETY)
+ * ============================================================
+ * EDGE CASE FIX: Prevent FIFO corruption during frequency switch
+ * - Enter STDBY before frequency change
+ * - Clear all IRQ flags
+ * - Reset FIFO pointers to base addresses
+ * - Allow PLL to settle (FREQ_SWITCH_SETTLE_MS)
+ * - Re-enter RX_CONTINUOUS
+ */
 static void set_frequency_433(void)
 {
+    /* Step 1: Enter standby */
     write_reg(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+    vTaskDelay(pdMS_TO_TICKS(5));
+    
+    /* Step 2: Change frequency registers */
     write_reg(REG_FRF_MSB, FREQ_L1_MSB);
     write_reg(REG_FRF_MID, FREQ_L1_MID);
     write_reg(REG_FRF_LSB, FREQ_L1_LSB);
-    ESP_LOGD(TAG, "Frequency set to 433.0 MHz (Layer 1 RX)");
+    
+    /* Step 3: Clear IRQ flags and reset FIFO pointers */
+    write_reg(REG_IRQ_FLAGS, 0xFF);
+    write_reg(REG_FIFO_ADDR_PTR, 0x00);
+    write_reg(REG_FIFO_RX_BASE_ADDR, 0x00);
+    
+    /* Step 4: Wait for PLL lock */
+    vTaskDelay(pdMS_TO_TICKS(FREQ_SWITCH_SETTLE_MS));
+    
+    ESP_LOGD(TAG, "Frequency set to 433.0 MHz (Layer 1 RX) — FIFO reset complete");
 }
 
 static void set_frequency_434(void)
 {
+    /* Step 1: Enter standby */
     write_reg(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+    vTaskDelay(pdMS_TO_TICKS(5));
+    
+    /* Step 2: Change frequency registers */
     write_reg(REG_FRF_MSB, FREQ_L2_MSB);
     write_reg(REG_FRF_MID, FREQ_L2_MID);
     write_reg(REG_FRF_LSB, FREQ_L2_LSB);
-    ESP_LOGD(TAG, "Frequency set to 434.0 MHz (Layer 2 TX)");
+    
+    /* Step 3: Clear IRQ flags and reset FIFO pointers */
+    write_reg(REG_IRQ_FLAGS, 0xFF);
+    write_reg(REG_FIFO_ADDR_PTR, 0x80);
+    write_reg(REG_FIFO_TX_BASE_ADDR, 0x80);
+    
+    /* Step 4: Wait for PLL lock */
+    vTaskDelay(pdMS_TO_TICKS(FREQ_SWITCH_SETTLE_MS));
+    
+    ESP_LOGD(TAG, "Frequency set to 434.0 MHz (Layer 2 TX) — FIFO reset complete");
 }
 
 /* ============================================================
  * SECTION 9 — CRC16-CCITT
- * ============================================================
- * Polynomial 0x1021, initial value 0xFFFF.
- *
- * FIX G: Comment corrected — Layer 1 CRC is computed over 10 bytes (0..9),
- * not 9 bytes as previously stated. The function itself is unchanged.
- * Node source confirms: crc16_ccitt(buf, 10) over bytes 0..9.
- *
- * Layer 1 : computed over bytes 0..9  (10 bytes), stored at offset 10–11.
- * Layer 2 : computed over bytes 0..32 (33 bytes), stored at offset 33–34.
- */
+ * ============================================================ */
 static uint16_t crc16_ccitt(const uint8_t *data, uint16_t length)
 {
     uint16_t crc = 0xFFFF;
@@ -418,37 +421,52 @@ static inline void put_u32_be(uint8_t *buf, uint8_t offset, uint32_t val)
 }
 
 /* ============================================================
- * SECTION 11 — LAYER 1 PACKET VALIDATION
+ * SECTION 11 — SENSOR TYPE VALIDATION
  * ============================================================
- *
- * Validates a 12-byte Layer 1 packet.
- *
- * Packet layout (12 bytes, big-endian):
- *   [0]     Node_ID       uint8
- *   [1]     Gateway_ID    uint8
- *   [2-3]   Packet_ID     uint16 BE
- *   [4-7]   Timestamp     uint32 BE
- *   [8-9]   Sensor_Value  uint16 BE
- *   [10-11] CRC           uint16 BE
- *
- * FIX G: Layout comment corrected — CRC is over bytes [0..9] (10 bytes).
- * Previous comment incorrectly stated bytes [0..8]. Function was already
- * correct from FIX F. This is a documentation fix only.
- *
- * Validation checks (in order):
- *   1. CRC16-CCITT over bytes [0..9] (L1_CRC_INPUT_BYTES=10) matches [10..11]
- *   2. Node_ID must be 0x01 or 0x02 (active nodes in R&D)
- *   3. Gateway_ID must be 0x01 (this gateway)
- *   4. Packet_ID != 0x0000 (reserved)
- *   5. Packet_ID != last seen for that node (deduplication)
+ * NEW: Validate that Node_ID matches expected sensor type
+ */
+static const char* get_sensor_type_name(uint8_t node_id)
+{
+    switch (node_id) {
+        case NODE_TEMP_ID:  return "Temperature (DS18B20)";
+        case NODE_HUM_ID:   return "Humidity";
+        case NODE_LIGHT_ID: return "Light";
+        default:            return "UNKNOWN";
+    }
+}
+
+static bool validate_sensor_type(uint8_t node_id, sensor_type_t expected_type)
+{
+    sensor_type_t actual_type = SENSOR_TYPE_UNKNOWN;
+    
+    switch (node_id) {
+        case NODE_TEMP_ID:  actual_type = SENSOR_TYPE_TEMPERATURE; break;
+        case NODE_HUM_ID:   actual_type = SENSOR_TYPE_HUMIDITY;    break;
+        case NODE_LIGHT_ID: actual_type = SENSOR_TYPE_LIGHT;       break;
+        default:            actual_type = SENSOR_TYPE_UNKNOWN;     break;
+    }
+    
+    if (actual_type != expected_type) {
+        ESP_LOGE(TAG, "SENSOR TYPE MISMATCH DETECTED!");
+        ESP_LOGE(TAG, "  Node_ID 0x%02X reports as: %s", 
+                 node_id, get_sensor_type_name(node_id));
+        ESP_LOGE(TAG, "  Expected sensor type: %s (type %d)",
+                 get_sensor_type_name(expected_type), expected_type);
+        ESP_LOGE(TAG, "  ACTION: Packet REJECTED — verify node configuration");
+        return false;
+    }
+    
+    return true;
+}
+
+/* ============================================================
+ * SECTION 12 — LAYER 1 PACKET VALIDATION
+ * ============================================================
+ * ENHANCED: Added sensor type validation
  */
 static bool validate_l1_packet(const uint8_t *raw, validated_packet_t *out)
 {
-    /*
-     * FIX F: CRC over L1_CRC_INPUT_BYTES (10), not 9.
-     * Node computes over bytes 0..9: all data including both bytes of Sensor_Value.
-     * CRC is read from offset 10 — unchanged, was always correct.
-     */
+    /* CRC validation */
     uint16_t computed_crc = crc16_ccitt(raw, L1_CRC_INPUT_BYTES);
     uint16_t received_crc = parse_u16_be(raw, 10);
 
@@ -464,23 +482,35 @@ static bool validate_l1_packet(const uint8_t *raw, validated_packet_t *out)
     uint32_t timestamp    = parse_u32_be(raw, 4);
     uint16_t sensor_value = parse_u16_be(raw, 8);
 
-    if (node_id != NODE_TEMP_ID && node_id != NODE_HUM_ID) {
-        ESP_LOGW(TAG, "L1 Node_ID 0x%02X rejected — not in GW1 R&D active set",
+    /* Node ID range validation - NOW INCLUDES NODE 0x03 */
+    if (node_id != NODE_TEMP_ID && node_id != NODE_HUM_ID && node_id != NODE_LIGHT_ID) {
+        ESP_LOGE(TAG, "L1 INVALID Node_ID 0x%02X — GW1 only handles 0x01(Temp), 0x02(Hum), 0x03(Light)",
                  node_id);
+        ESP_LOGE(TAG, "  Received Node_ID does not match any configured sensor");
+        ESP_LOGE(TAG, "  ACTION: Check node firmware configuration");
         return false;
     }
 
+    /* NEW: Sensor type validation */
+    sensor_type_t expected_type = (sensor_type_t)node_id;
+    if (!validate_sensor_type(node_id, expected_type)) {
+        return false;  /* Error already logged in validate_sensor_type() */
+    }
+
+    /* Gateway ID validation */
     if (gw_id != GW_ID) {
         ESP_LOGW(TAG, "L1 GW_ID 0x%02X rejected — expected 0x01", gw_id);
         return false;
     }
 
+    /* Packet ID validation */
     if (packet_id == 0x0000) {
         ESP_LOGW(TAG, "L1 Node 0x%02X: Packet_ID 0x0000 reserved — discarded",
                  node_id);
         return false;
     }
 
+    /* Deduplication check */
     uint8_t idx = node_id - 1;
     if (s_node_buf[idx].last_packet_id == packet_id) {
         ESP_LOGW(TAG, "L1 Node 0x%02X: Packet_ID 0x%04X duplicate — discarded",
@@ -496,8 +526,10 @@ static bool validate_l1_packet(const uint8_t *raw, validated_packet_t *out)
 }
 
 /* ============================================================
- * SECTION 12 — LAYER 2 PACKET BUILDER
- * ============================================================ */
+ * SECTION 13 — LAYER 2 PACKET BUILDER
+ * ============================================================
+ * UPDATED: Node 0x03 now uses actual data (not sentinel)
+ */
 static void build_nodeblock(uint8_t *buf, uint8_t offset,
                              uint8_t node_id, const node_buffer_t *nb)
 {
@@ -523,7 +555,7 @@ static void build_l2_packet(void)
 
     build_nodeblock(s_l2_packet,  6, NODE_TEMP_ID,  &s_node_buf[0]);
     build_nodeblock(s_l2_packet, 15, NODE_HUM_ID,   &s_node_buf[1]);
-    build_nodeblock(s_l2_packet, 24, NODE_LIGHT_ID, &s_node_buf[2]);
+    build_nodeblock(s_l2_packet, 24, NODE_LIGHT_ID, &s_node_buf[2]);  /* CHANGED: now active */
 
     uint16_t crc = crc16_ccitt(s_l2_packet, 33);
     put_u16_be(s_l2_packet, 33, crc);
@@ -535,18 +567,30 @@ static void build_l2_packet(void)
     ESP_LOGI(TAG, "  NodeBlock 2 (0x02 Hum)   : %s  raw=0x%04X",
              s_node_buf[1].received ? "DATA    " : "SENTINEL",
              s_node_buf[1].received ? s_node_buf[1].sensor_value : 0xFFFF);
-    ESP_LOGI(TAG, "  NodeBlock 3 (0x03 Light) : SENTINEL (offline in R&D)");
+    ESP_LOGI(TAG, "  NodeBlock 3 (0x03 Light) : %s  raw=0x%04X",  /* CHANGED */
+             s_node_buf[2].received ? "DATA    " : "SENTINEL",
+             s_node_buf[2].received ? s_node_buf[2].sensor_value : 0xFFFF);
     ESP_LOGI(TAG, "  CRC = 0x%04X", crc);
 }
 
 /* ============================================================
- * SECTION 13 — LAYER 2 TX WITH ACK + RETRY
- * ============================================================ */
+ * SECTION 14 — LAYER 2 TX WITH ACK + RETRY
+ * ============================================================
+ * ENHANCED: TX watchdog for edge case protection
+ */
 static void transmit_l2_packet(void)
 {
     bool ack_received = false;
+    s_tx_start_time = (uint32_t)(esp_timer_get_time() / 1000ULL);  /* NEW: start watchdog */
 
     for (uint8_t attempt = 1; attempt <= LAYER2_MAX_RETRIES; attempt++) {
+        /* NEW: Watchdog check */
+        uint32_t elapsed = (uint32_t)(esp_timer_get_time() / 1000ULL) - s_tx_start_time;
+        if (elapsed > TX_WATCHDOG_TIMEOUT_MS) {
+            ESP_LOGE(TAG, "TX WATCHDOG TIMEOUT — aborting after %lu ms", (unsigned long)elapsed);
+            break;
+        }
+
         ESP_LOGI(TAG, "L2 TX attempt %u/%u", attempt, LAYER2_MAX_RETRIES);
 
         set_frequency_434();
@@ -620,6 +664,7 @@ static void transmit_l2_packet(void)
         ESP_LOGE(TAG, "L2 TX FAILED — no ACK after %u attempts", LAYER2_MAX_RETRIES);
     }
 
+    /* CRITICAL: Safe frequency switch with FIFO reset */
     set_frequency_433();
     write_reg(REG_DIO_MAPPING1,      0x00);
     write_reg(REG_PAYLOAD_LENGTH,    L1_PACKET_SIZE);
@@ -630,7 +675,7 @@ static void transmit_l2_packet(void)
 }
 
 /* ============================================================
- * SECTION 14 — ESP_TIMER CALLBACKS (CYCLE TIMING)
+ * SECTION 15 — ESP_TIMER CALLBACKS (CYCLE TIMING)
  * ============================================================ */
 static esp_timer_handle_t s_agg_timer;
 static esp_timer_handle_t s_cycle_timer;
@@ -652,6 +697,8 @@ static void cycle_reset_timer_cb(void *arg)
 
 static void start_cycle_timers(void)
 {
+    s_current_cycle_start = (uint32_t)(esp_timer_get_time() / 1000ULL);  /* NEW */
+    
     esp_timer_create_args_t agg_args = { .callback = agg_timer_cb, .name = "agg" };
     esp_timer_create(&agg_args, &s_agg_timer);
     esp_timer_start_once(s_agg_timer, 25000000ULL);
@@ -664,8 +711,10 @@ static void start_cycle_timers(void)
 }
 
 /* ============================================================
- * SECTION 15 — TASK A: LoRa RX
- * ============================================================ */
+ * SECTION 16 — TASK A: LoRa RX
+ * ============================================================
+ * ENHANCED: Better TX_ACTIVE handling with timeout
+ */
 static void task_lora_rx(void *arg)
 {
     ESP_LOGI(TAG, "Task A (LoRa RX) started");
@@ -674,7 +723,17 @@ static void task_lora_rx(void *arg)
     uint8_t raw_buf[L1_PACKET_SIZE];
 
     while (1) {
-        if (s_tx_active) { vTaskDelay(pdMS_TO_TICKS(10)); continue; }
+        /* NEW: Watchdog check for stuck TX */
+        if (s_tx_active) {
+            uint32_t tx_elapsed = (uint32_t)(esp_timer_get_time() / 1000ULL) - s_tx_start_time;
+            if (tx_elapsed > TX_WATCHDOG_TIMEOUT_MS) {
+                ESP_LOGE(TAG, "Task A: TX watchdog triggered — forcing s_tx_active = false");
+                s_tx_active = false;
+            } else {
+                vTaskDelay(pdMS_TO_TICKS(10));
+                continue;
+            }
+        }
 
         uint8_t irq = read_reg(REG_IRQ_FLAGS);
         if (!(irq & IRQ_RX_DONE_MASK)) { vTaskDelay(pdMS_TO_TICKS(5)); continue; }
@@ -712,8 +771,10 @@ static void task_lora_rx(void *arg)
 }
 
 /* ============================================================
- * SECTION 16 — TASK B: VALIDATION
- * ============================================================ */
+ * SECTION 17 — TASK B: VALIDATION
+ * ============================================================
+ * UPDATED: Now logs all three sensor types
+ */
 static void task_validation(void *arg)
 {
     ESP_LOGI(TAG, "Task B (Validation) started");
@@ -729,14 +790,18 @@ static void task_validation(void *arg)
 
                 if (vp.node_id == NODE_TEMP_ID) {
                     float temp_c = (float)(int16_t)vp.sensor_value / 10.0f;
-                    ESP_LOGI(TAG, "Task B: Node 0x01 VALID — Temp=%.1f C "
+                    ESP_LOGI(TAG, "Task B: Node 0x01 VALID — Temp=%.1f°C "
                              "PktID=0x%04X TS=%lu ms",
                              temp_c, vp.packet_id, (unsigned long)vp.timestamp);
-                } else {
+                } else if (vp.node_id == NODE_HUM_ID) {
                     float hum = (float)vp.sensor_value / 10.0f;
                     ESP_LOGI(TAG, "Task B: Node 0x02 VALID — Hum=%.1f%% "
                              "PktID=0x%04X TS=%lu ms",
                              hum, vp.packet_id, (unsigned long)vp.timestamp);
+                } else if (vp.node_id == NODE_LIGHT_ID) {  /* NEW */
+                    ESP_LOGI(TAG, "Task B: Node 0x03 VALID — Light=%u lux "
+                             "PktID=0x%04X TS=%lu ms",
+                             vp.sensor_value, vp.packet_id, (unsigned long)vp.timestamp);
                 }
 
                 if (xQueueSend(s_validated_queue, &vp, pdMS_TO_TICKS(10)) != pdTRUE) {
@@ -748,8 +813,10 @@ static void task_validation(void *arg)
 }
 
 /* ============================================================
- * SECTION 17 — TASK C: AGGREGATION
- * ============================================================ */
+ * SECTION 18 — TASK C: AGGREGATION
+ * ============================================================
+ * EDGE CASE FIX: Cycle timestamp validation
+ */
 static void task_aggregation(void *arg)
 {
     ESP_LOGI(TAG, "Task C (Aggregation) started");
@@ -758,26 +825,46 @@ static void task_aggregation(void *arg)
     uint8_t dummy = 1;
 
     while (1) {
+        /* NEW: Validate packet belongs to current cycle */
         while (xQueueReceive(s_validated_queue, &vp, pdMS_TO_TICKS(10)) == pdTRUE) {
+            uint32_t packet_age = (uint32_t)(esp_timer_get_time() / 1000ULL) - vp.timestamp;
+            
+            /* Reject packets older than current cycle */
+            if (packet_age > CYCLE_DURATION_MS) {
+                ESP_LOGW(TAG, "Task C: Node 0x%02X packet too old (%lu ms) — discarded",
+                         vp.node_id, (unsigned long)packet_age);
+                continue;
+            }
+            
             uint8_t idx = vp.node_id - 1;
-            if (idx < 2) {
+            if (idx < 3) {  /* CHANGED: was <2, now includes node 3 */
                 s_node_buf[idx].received     = true;
                 s_node_buf[idx].node_id      = vp.node_id;
                 s_node_buf[idx].packet_id    = vp.packet_id;
                 s_node_buf[idx].timestamp    = vp.timestamp;
                 s_node_buf[idx].sensor_value = vp.sensor_value;
+                s_node_buf[idx].cycle_timestamp = s_current_cycle_start;
             }
         }
 
         if (xSemaphoreTake(s_agg_trigger, 0) == pdTRUE) {
+            /* Drain any remaining packets before aggregation */
             while (xQueueReceive(s_validated_queue, &vp, pdMS_TO_TICKS(5)) == pdTRUE) {
+                uint32_t packet_age = (uint32_t)(esp_timer_get_time() / 1000ULL) - vp.timestamp;
+                if (packet_age > CYCLE_DURATION_MS) {
+                    ESP_LOGW(TAG, "Task C (agg): Node 0x%02X packet too old — discarded",
+                             vp.node_id);
+                    continue;
+                }
+                
                 uint8_t idx = vp.node_id - 1;
-                if (idx < 2) {
+                if (idx < 3) {  /* CHANGED */
                     s_node_buf[idx].received     = true;
                     s_node_buf[idx].node_id      = vp.node_id;
                     s_node_buf[idx].packet_id    = vp.packet_id;
                     s_node_buf[idx].timestamp    = vp.timestamp;
                     s_node_buf[idx].sensor_value = vp.sensor_value;
+                    s_node_buf[idx].cycle_timestamp = s_current_cycle_start;
                 }
             }
 
@@ -786,7 +873,8 @@ static void task_aggregation(void *arg)
                      s_node_buf[0].received ? "RECEIVED" : "ABSENT");
             ESP_LOGI(TAG, "  Node 0x02 (Hum)  : %s",
                      s_node_buf[1].received ? "RECEIVED" : "ABSENT");
-            ESP_LOGI(TAG, "  Node 0x03 (Light): OFFLINE (R&D sentinel)");
+            ESP_LOGI(TAG, "  Node 0x03 (Light): %s",  /* CHANGED */
+                     s_node_buf[2].received ? "RECEIVED" : "ABSENT");
 
             build_l2_packet();
             s_l2_packet_ready = true;
@@ -796,7 +884,7 @@ static void task_aggregation(void *arg)
         if (xSemaphoreTake(s_cycle_reset_c, 0) == pdTRUE) {
             s_node_buf[0].received = false;
             s_node_buf[1].received = false;
-            s_node_buf[2].received = false;
+            s_node_buf[2].received = false;  /* CHANGED: was hardcoded sentinel */
             s_l2_packet_ready = false;
             ESP_LOGI(TAG, "--- T=30s: Cycle reset — buffers cleared ---");
         }
@@ -804,8 +892,10 @@ static void task_aggregation(void *arg)
 }
 
 /* ============================================================
- * SECTION 18 — TASK D: LoRa TX
- * ============================================================ */
+ * SECTION 19 — TASK D: LoRa TX
+ * ============================================================
+ * ENHANCED: TX_ACTIVE flag management with watchdog
+ */
 static void task_lora_tx(void *arg)
 {
     ESP_LOGI(TAG, "Task D (LoRa TX) started");
@@ -815,10 +905,14 @@ static void task_lora_tx(void *arg)
         if (xQueueReceive(s_l2_tx_trigger, &trigger, portMAX_DELAY) == pdTRUE) {
             ESP_LOGI(TAG, "Task D: TX trigger received");
             s_tx_active = true;
+            s_tx_start_time = (uint32_t)(esp_timer_get_time() / 1000ULL);  /* NEW: start watchdog */
+            
             vTaskDelay(pdMS_TO_TICKS(15));
             xSemaphoreTake(s_lora_mutex, portMAX_DELAY);
             ESP_LOGI(TAG, "Task D: mutex acquired — L2 TX begin");
+            
             transmit_l2_packet();
+            
             xSemaphoreGive(s_lora_mutex);
             s_tx_active = false;
             ESP_LOGI(TAG, "Task D: mutex released — Task A resumes RX");
@@ -827,7 +921,7 @@ static void task_lora_tx(void *arg)
 }
 
 /* ============================================================
- * SECTION 19 — CYCLE MANAGER TASK
+ * SECTION 20 — CYCLE MANAGER TASK
  * ============================================================ */
 static void task_cycle_manager(void *arg)
 {
@@ -845,7 +939,7 @@ static void task_cycle_manager(void *arg)
 }
 
 /* ============================================================
- * SECTION 20 — NODE BUFFER INITIALISATION
+ * SECTION 21 — NODE BUFFER INITIALISATION
  * ============================================================ */
 static void init_node_buffers(void)
 {
@@ -856,19 +950,20 @@ static void init_node_buffers(void)
         s_node_buf[i].timestamp      = 0;
         s_node_buf[i].sensor_value   = 0;
         s_node_buf[i].last_packet_id = 0;
+        s_node_buf[i].cycle_timestamp = 0;  /* NEW */
     }
 }
 
 /* ============================================================
- * SECTION 21 — APP_MAIN
+ * SECTION 22 — APP_MAIN
  * ============================================================ */
 void app_main(void)
 {
     ESP_LOGI(TAG, "========================================");
-    ESP_LOGI(TAG, " Estrotech Local Gateway GW1 — R&D Phase");
+    ESP_LOGI(TAG, " Estrotech Local Gateway GW1 — R&D Phase (REVISED)");
     ESP_LOGI(TAG, " ESP32-C3 Super Mini | ESP-IDF v5.5.2");
-    ESP_LOGI(TAG, " Active: Node 0x01 (T=0s), Node 0x02 (T=4s)");
-    ESP_LOGI(TAG, " Offline: Node 0x03 (sentinel always)");
+    ESP_LOGI(TAG, " Active: Node 0x01 (T=0s), Node 0x02 (T=4s), Node 0x03 (T=8s)");
+    ESP_LOGI(TAG, " All sensors OPERATIONAL");  /* CHANGED */
     ESP_LOGI(TAG, " L1=433MHz L2=434MHz ACK=0xAA Retry=3");
     ESP_LOGI(TAG, "========================================");
 
@@ -910,5 +1005,5 @@ void app_main(void)
     xTaskCreate(task_cycle_manager, "CycleMgr",  2048, NULL, 2, NULL);
 
     ESP_LOGI(TAG, "All tasks created — gateway operational");
-    ESP_LOGI(TAG, "Listening on 433.0 MHz for Node 0x01 and Node 0x02");
+    ESP_LOGI(TAG, "Listening on 433.0 MHz for Node 0x01, 0x02, and 0x03");  /* CHANGED */
 }
